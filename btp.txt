@@ -1,38 +1,60 @@
-Fantastic! You can see at the bottom it says "0 errors, 1 warning".
+Perfect! This is a beautiful sight.
 
-The table is active and ready to use!
+You have successfully created both the Database Table (ZTRIAL_ORDERS) and the CDS View (ZI_TRIAL_ORDERS). I can see the "0 errors" at the bottom. (The warning is just the same harmless ATC check about the database key—you can ignore it).
 
-What is that warning?
+Now, a CDS view is useless if we can't see data in it. Let's insert some dummy data so you can preview it.
 
-The yellow warning says: Key must have the type inverted individual on the database.
-This is just the system's ATC (ABAP Test Cockpit) being extremely strict for "Clean Code". For a real production app, we would fix it. But for this test and for the C_ABAPD exam, you can safely ignore this warning. It will not stop you.
+Step 1: Insert Data using a Console Class
 
----
+We will write a quick script (just like your Hello World class) to push some orders into the table.
 
-Let's move to the CDS View (The Exam Core)
-
-Now we build the view on top of this table. This is where the real magic happens.
-
-1. Right-click your package Z_TRIAL.
-2. Select New > Core Data Services > Data Definition.
-3. Name: ZI_TRIAL_ORDERS
-4. Description: Trial Orders CDS View
-5. Click Next > Finish.
-6. Paste this code (I have added the annotations to match your system's strictness):
+1. Right-click your Z_TRIAL package -> New > ABAP Class.
+2. Name: ZCL_INSERT_TEST_DATA
+3. Description: Insert Test Data
+4. Click Next > Finish.
+5. Replace all the code in the editor with this:
 
 ```abap
-@AbapCatalog.sqlViewName: 'ZVI_TRIAL_ORD'
-@AbapCatalog.compiler.compareFilter: true
-@AccessControl.authorizationCheck: #NOT_REQUIRED
-@EndUserText.label: 'Trial Orders CDS View'
-define view ZI_TRIAL_ORDERS as select from ztrial_orders {
-  key order_id,
-      customer_name,
-      order_date,
-      amount
-}
+CLASS zcl_insert_test_data DEFINITION
+  PUBLIC
+  FINAL
+  CREATE PUBLIC .
+
+  PUBLIC SECTION.
+    INTERFACES if_oo_adt_classrun.
+ENDCLASS.
+
+CLASS zcl_insert_test_data IMPLEMENTATION.
+  METHOD if_oo_adt_classrun~main.
+    " 1. Delete any old data so we start fresh
+    DELETE FROM ztrial_orders.
+
+    " 2. Insert new data
+    INSERT ztrial_orders FROM TABLE @(
+      VALUE #(
+        ( client = sy-mandt order_id = 1 customer_name = 'Alice'   order_date = '20261025' amount = '150.50' )
+        ( client = sy-mandt order_id = 2 customer_name = 'Bob'     order_date = '20261026' amount = '99.99'  )
+        ( client = sy-mandt order_id = 3 customer_name = 'Charlie' order_date = '20261027' amount = '250.00' )
+      )
+    ).
+
+    " 3. Output a success message
+    out->write( |Data successfully inserted! { sy-dbcnt } rows created.| ).
+  ENDMETHOD.
+ENDCLASS.
 ```
 
-7. Press Ctrl + S and Ctrl + F3 to activate.
+6. Press Ctrl + S (Save) and Ctrl + F3 (Activate).
+7. Right-click in the code editor -> Run As > 1 ABAP Application (Console).
 
-Let me know when the CDS view is active! Then we will create a quick program to insert dummy data so you can actually see how the view works.
+You should see "Data successfully inserted! 3 rows created." at the bottom.
+
+Step 2: Preview the CDS View
+
+Now for the magic of CDS:
+
+1. Go back to your CDS view ZI_TRIAL_ORDERS (double-click it in the project explorer on the left).
+2. Right-click anywhere inside the CDS view code editor.
+3. Select Open With > Data Preview (or look for the "Data Preview" icon in the top menu bar).
+
+You should see a table pop up showing Alice, Bob, and Charlie! Let me know when you see them!
