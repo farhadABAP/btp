@@ -1,0 +1,49 @@
+
+---
+
+Complete Guide: Create Table and CDS View
+
+Part 1: Create the Database Table
+
+1. Right-click package Z_TRIAL -> New -> Database Table.
+2. Name: ZTRIAL_ORDERS | Description: Trial Orders Table -> Next -> Finish.
+3. Paste this code:
+
+```abap
+@EndUserText.label : 'Trial Orders'
+@AbapCatalog.enhancement.category : #NOT_EXTENSIBLE
+define table ztrial_orders {
+  key client      : abap.clnt not null;
+  key order_id    : abap.int4 not null;
+  customer_name   : abap.char(50);
+  order_date      : abap.dats;
+  amount          : abap.dec(10,2);
+}
+```
+
+4. Press Ctrl + S (Save) then Ctrl + F3 (Activate). If asked for a transport, type "test" and Enter.
+
+Part 2: Create the CDS View
+
+1. Right-click package Z_TRIAL -> New -> Core Data Services -> Data Definition.
+2. Name: ZI_TRIAL_ORDERS | Description: Trial Orders CDS View -> Next -> Finish.
+3. Paste this code:
+
+```abap
+@AbapCatalog.sqlViewName: 'ZVI_TRIAL_ORD'
+@AbapCatalog.compiler.compareFilter: true
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Trial Orders CDS View'
+define view ZI_TRIAL_ORDERS as select from ztrial_orders {
+  key order_id,
+      customer_name,
+      order_date,
+      amount
+}
+```
+
+4. Press Ctrl + S (Save) then Ctrl + F3 (Activate).
+
+---
+
+Once both of these are active (green checkmarks), reply to me and we will generate some test data to preview the view!
