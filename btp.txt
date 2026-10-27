@@ -1,60 +1,50 @@
-Perfect! This is a beautiful sight.
+Here is the complete, structured guide for your CDS learning and practice session. You can copy this entire block and save it as your roadmap for tomorrow.
 
-You have successfully created both the Database Table (ZTRIAL_ORDERS) and the CDS View (ZI_TRIAL_ORDERS). I can see the "0 errors" at the bottom. (The warning is just the same harmless ATC check about the database key—you can ignore it).
+---
 
-Now, a CDS view is useless if we can't see data in it. Let's insert some dummy data so you can preview it.
+🚀 C_ABAPD CDS Master Plan (Eclipse ADT)
 
-Step 1: Insert Data using a Console Class
+🎯 Phase 1: The Basics (Data & Filters)
 
-We will write a quick script (just like your Hello World class) to push some orders into the table.
+Goal: Understand how to build a view and push filtering logic to the database.
 
-1. Right-click your Z_TRIAL package -> New > ABAP Class.
-2. Name: ZCL_INSERT_TEST_DATA
-3. Description: Insert Test Data
-4. Click Next > Finish.
-5. Replace all the code in the editor with this:
+1. Create a CDS View with a Filter: Modify your existing ZI_TRIAL_ORDERS to only show orders where amount > 100.
+   · Exam focus: Code pushdown. Filtering in CDS is faster than filtering in ABAP.
+   · Code snippet: define view ZI_TRIAL_ORDERS as select from ztrial_orders { key order_id, amount } where amount > 100;
 
-```abap
-CLASS zcl_insert_test_data DEFINITION
-  PUBLIC
-  FINAL
-  CREATE PUBLIC .
+🔗 Phase 2: Associations (High Exam Frequency)
 
-  PUBLIC SECTION.
-    INTERFACES if_oo_adt_classrun.
-ENDCLASS.
+Goal: Learn how to link two tables without writing explicit JOINs.
 
-CLASS zcl_insert_test_data IMPLEMENTATION.
-  METHOD if_oo_adt_classrun~main.
-    " 1. Delete any old data so we start fresh
-    DELETE FROM ztrial_orders.
+1. Create a Customer Table: Create ZTRIAL_CUSTOMERS (Fields: client, customer_id, customer_name, country).
+2. Insert Data: Write a quick class to add 2 customers (e.g., ID 1 = Alice, ID 2 = Bob).
+3. Link them: Modify your ZTRIAL_ORDERS table to include a customer_id field.
+4. Create the Association: In your CDS view, use association [0..1] to ZI_TRIAL_CUSTOMERS as _Customer on $projection.customer_id = _Customer.customer_id.
 
-    " 2. Insert new data
-    INSERT ztrial_orders FROM TABLE @(
-      VALUE #(
-        ( client = sy-mandt order_id = 1 customer_name = 'Alice'   order_date = '20261025' amount = '150.50' )
-        ( client = sy-mandt order_id = 2 customer_name = 'Bob'     order_date = '20261026' amount = '99.99'  )
-        ( client = sy-mandt order_id = 3 customer_name = 'Charlie' order_date = '20261027' amount = '250.00' )
-      )
-    ).
+🛡️ Phase 3: Access Control (DCL)
 
-    " 3. Output a success message
-    out->write( |Data successfully inserted! { sy-dbcnt } rows created.| ).
-  ENDMETHOD.
-ENDCLASS.
-```
+Goal: Restrict data based on user roles (Row-level security).
 
-6. Press Ctrl + S (Save) and Ctrl + F3 (Activate).
-7. Right-click in the code editor -> Run As > 1 ABAP Application (Console).
+1. Create a DCL Object: Right-click package -> New -> Core Data Services -> Access Control.
+2. Name: ZAC_TRIAL_ORDERS
+3. Bind to View: In your CDS view, change @AccessControl.authorizationCheck: #NOT_REQUIRED to #CHECK.
+4. Define the Rule: Use grant select on ZI_TRIAL_ORDERS where ( customer_name ) = aspect pfcg_auth( ... ); (We will code the exact syntax tomorrow).
 
-You should see "Data successfully inserted! 3 rows created." at the bottom.
+🧮 Phase 4: Calculations & Aggregations
 
-Step 2: Preview the CDS View
+Goal: Transform data in the database layer.
 
-Now for the magic of CDS:
+1. Calculated Fields: Add a field in your view that multiplies amount * 1.19 to calculate tax.
+2. Aggregation: Create a new view ZI_ORDER_SUMMARY that calculates the SUM(amount) and groups by customer_id.
+   · Exam focus: Replacing ABAP COLLECT or LOOP with database-level aggregations.
 
-1. Go back to your CDS view ZI_TRIAL_ORDERS (double-click it in the project explorer on the left).
-2. Right-click anywhere inside the CDS view code editor.
-3. Select Open With > Data Preview (or look for the "Data Preview" icon in the top menu bar).
+🧠 Phase 5: Exam Scenarios to Practice
 
-You should see a table pop up showing Alice, Bob, and Charlie! Let me know when you see them!
+· Scenario A (Pushdown): Convert a traditional SELECT * followed by LOOP ... WHERE amount > 1000 into a CDS view.
+· Scenario B (Annotations): Add @UI.lineItem: [{ position: 10 }] to fields to prepare them for a Fiori UI.
+· Scenario C (Associations): Use \_Customer-Country to fetch the customer's country directly in the Orders view without a JOIN.
+
+---
+
+Instructions for Tomorrow:
+When you sit at your computer, just open Eclipse, open this chat, and say "Ready for Phase 1". We will code it line-by-line together!
